@@ -5,7 +5,6 @@ const path = require("path");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const compression = require("compression");
-const morgan = require("morgan");
 
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
@@ -24,26 +23,24 @@ app.use(helmet({
 
 app.use(compression());
 
+// Logging
 if (process.env.NODE_ENV === "development") {
+  const morgan = require("morgan");
   app.use(morgan("dev"));
 }
 
-// ==================== CORS - MANUAL ====================
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-// ======================================================
+// ==================== CORS ====================
+// Telefonlarda ham ishlashi uchun to‘liq ruxsat
+app.use(cors({
+  origin: "*", // Har qanday telefon/host
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-// Rate Limiting
+// Preflight OPTIONS request
+app.options("*", cors());
+
+// ==================== Rate Limiting ====================
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -59,27 +56,35 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
+// Body Parser
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// API routes
+// ==================== Routes ====================
+// Agar /api/auth da login bo‘lsa authLimiter ishlaydi
 app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
+
+// Bu route-lar token bilan ishlashi uchun, frontend har doim
+// axios headers: { Authorization: `Bearer TOKEN` } yuborishi kerak
 app.use("/api/teachers", require("./routes/teacherRoutes"));
 app.use("/api/news", require("./routes/newsRoutes"));
 
+// Root route
 app.get("/", (req, res) => {
   res.json({ message: "Tech College API running..." });
 });
 
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// Global error handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5001;  // 5001 ekanligini tekshiring
-
+// PORT
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`🌍 CORS enabled for all origins`);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌍 CORS enabled for all origins (telefonlarda ham ishlaydi)`);
 });

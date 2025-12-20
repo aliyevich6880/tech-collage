@@ -11,13 +11,11 @@ const { requireAdminAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-// All news - admin only
-router.get("/", requireAdminAuth, getNews);
+// ✅ GET - Hammaga ochiq (token kerak emas)
+router.get("/", getNews);
+router.get("/:id", getNewsById);
 
-// Single news - admin only
-router.get("/:id", requireAdminAuth, getNewsById);
-
-// New news (with image) - admin only
+// 🔒 POST/PUT/DELETE - Faqat admin (token kerak)
 router.post(
   "/",
   requireAdminAuth,
@@ -25,7 +23,6 @@ router.post(
   createNews
 );
 
-// Update news (image optional) - admin only
 router.put(
   "/:id",
   requireAdminAuth,
@@ -33,9 +30,6 @@ router.put(
   updateNews
 );
 
-// Delete news - admin only
 router.delete("/:id", requireAdminAuth, deleteNews);
 
 module.exports = router;
-
-

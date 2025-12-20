@@ -11,13 +11,11 @@ const { requireAdminAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-// All teachers - admin only
-router.get("/", requireAdminAuth, getTeachers);
+// ✅ GET - Hammaga ochiq (token kerak emas)
+router.get("/", getTeachers);
+router.get("/:id", getTeacherById);
 
-// Single teacher - admin only
-router.get("/:id", requireAdminAuth, getTeacherById);
-
-// New teacher (with image) - admin only
+// 🔒 POST/PUT/DELETE - Faqat admin (token kerak)
 router.post(
   "/",
   requireAdminAuth,
@@ -25,7 +23,6 @@ router.post(
   createTeacher
 );
 
-// Update teacher (image optional) - admin only
 router.put(
   "/:id",
   requireAdminAuth,
@@ -33,9 +30,6 @@ router.put(
   updateTeacher
 );
 
-// Delete teacher - admin only
 router.delete("/:id", requireAdminAuth, deleteTeacher);
 
 module.exports = router;
-
-
