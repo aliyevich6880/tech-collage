@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const compression = require("compression");
 
+
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const { initCleanupJob } = require("./utils/cleanup");
@@ -63,6 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // ==================== Routes ====================
 // Agar /api/auth da login bo‘lsa authLimiter ishlaydi
 app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
+
 
 // Bu route-lar token bilan ishlashi uchun, frontend har doim
 // axios headers: { Authorization: `Bearer TOKEN` } yuborishi kerak
