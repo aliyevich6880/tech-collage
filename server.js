@@ -70,6 +70,7 @@ app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
 // axios headers: { Authorization: `Bearer TOKEN` } yuborishi kerak
 app.use("/api/teachers", require("./routes/teacherRoutes"));
 app.use("/api/news", require("./routes/newsRoutes"));
+app.use("/api/sections", require("./routes/sectionRoutes"));
 
 // Root route
 app.get("/", (req, res) => {
